@@ -1,0 +1,219 @@
+' https://bbs.iikx.com/thread-1045-1-1.html
+Sub mname()
+    '批量修改多个excel内指定的工作表的表名
+    Dim filename As String, twb As Workbook '定义变量
+    Application.ScreenUpdating = False '关闭屏幕更新
+    Application.DisplayAlerts = False '不显示需要确定删除的警告信息
+    filename = Dir(ThisWorkbook.Path & "\test" & "*.xlsx")
+    '获得test文件下的所有工作表的名字
+    Do While filename <> "" '若工作簿名字不为空，执行循环体；
+        fn = ThisWorkbook.Path & "\" & filename  '设置fn为路径；
+        Set twb = Workbooks.Open(fn) '打开五座神山文件下的工作簿；
+        twb.Worksheets(1).Name = "神山小百科" '修改第一个工作表的表名为“神山小百科”
+        twb.Close True '保存并关闭工作簿
+        filename = Dir  '继续下一个工作簿
+    Loop
+    Application.DisplayAlerts = True '恢复提示警告信息
+    Application.DisplayAlerts = True  '开启提示
+End Sub
+
+'https://cloud.tencent.com/developer/article/1899521
+Public Function RegExpMatch(input_range As range, pattern As String, Optional match_case As Boolean = True) As Variant
+
+   '存储结果的数组
+
+    Dim arRes() As Variant
+
+   '源单元格区域中当前行索引值
+
+   '源单元格区域中当前列索引值
+
+   '行数, 列数
+
+    Dim iInputCurRow As Long
+
+    Dim iInputCurCol As Long
+
+    Dim cntInputRows As Long
+
+    Dim cntInputCols As Long
+
+    On Error GoTo ErrHandl
+
+    RegExpMatch = arRes
+
+    Set regex = CreateObject("VBScript.RegExp")
+
+   regex.pattern = pattern
+
+   regex.Global = True
+
+   regex.MultiLine = True
+
+    If True = match_case Then
+
+       regex.ignorecase = False
+
+    Else
+
+       regex.ignorecase = True
+
+    End If
+
+   cntInputRows = input_range.Rows.Count
+
+   cntInputCols = input_range.Columns.Count
+
+    ReDim arRes(1 To cntInputRows, 1 To cntInputCols)
+
+    For iInputCurRow = 1 To cntInputRows
+
+        For iInputCurCol = 1 To cntInputCols
+
+           arRes(iInputCurRow, iInputCurCol) = regex.Test(input_range.Cells(iInputCurRow, iInputCurCol).Value)
+
+        Next
+
+    Next
+
+  RegExpMatch = arRes
+
+  Exit Function
+
+ErrHandl:
+
+   RegExpMatch = CVErr(xlErrValue)
+
+End Function
+'https://learn.microsoft.com/zh-cn/office/vba/excel/concepts/cells-and-ranges/looping-through-a-range-of-cells
+Sub RoundToZero1()
+ For Counter = 1 To 20
+ Set curCell = Worksheets("Sheet1").Cells(Counter, 3)
+    'If Abs(curCell.Value) < 0.01 Then curCell.Value = 0
+    Debug.Print curCell.Value
+ Next Counter
+End Sub
+
+Sub RoundToZero2()
+ For Each c In Worksheets("Sheet1").range("A1:D100").Cells
+    'If Abs(c.Value) < 0.01 Then c.Value = 0
+    Debug.Print c.Value
+ Next
+End Sub
+
+Sub RoundToZero3()
+ For Each c In ActiveCell.CurrentRegion.Cells
+    'If Abs(c.Value) < 0.01 Then c.Value = 0
+    Debug.Print c.Value
+ Next
+End Sub
+
+'Private Declare PtrSafe Function timeGetTime Lib "winmm.dll" () As Long
+Sub delay(T As Long)
+    Dim time1 As Long
+    time1 = timeGetTime
+    Do
+        DoEvents
+    Loop While timeGetTime - time1 < T
+End Sub
+
+Sub 宏1()
+     Dim i As Long, row_book As Long, column_book As Long         '遍历所有工作表（sheet）
+     For i = 1 To ActiveWorkbook.Worksheets.Count           '下面这句，亦可以用ActiveWorkbook.Worksheets(i).Activate 进行替代，代表激活此工作表
+        ActiveWorkbook.Worksheets(i).Select
+        '获取此激活的工作表的行和列
+        row_book = ActiveSheet.UsedRange.Rows.Count
+        column_book = ActiveSheet.UsedRange.Columns.Count
+        '选中所有数据，复制并粘贴为数值
+        range("A1:" & Cells(row_book, column_book).Address).Select
+        Selection.Copy
+        Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+            :=False, Transpose:=False
+        Application.CutCopyMode = False
+        
+        '延迟2s 这里存粹是为了测试，看他有没有异常，实际运行中，上面的时间封装，和这个delay就可以不用了~
+        'delay (2000)
+        Debug.Print (ActiveWorkbook.Worksheets(i).Name)
+     Next
+End Sub
+
+' https://jingyan.baidu.com/article/54b6b9c0cf5b046c593b4757.html
+Sub ListFilesTest()
+
+    With Application.FileDialog(msoFileDialogFolderPicker)
+
+        If .Show Then myPath$ = .SelectedItems(1) Else Exit Sub
+
+    End With
+
+    If Right(myPath, 1) <> "" Then myPath = myPath & ""
+
+    
+
+    [a:a] = ""                    '清空A列
+
+    Call ListAllFso(myPath)   '调用FSO遍历子文件夹的递归过程
+
+    
+
+End Sub
+
+ 
+
+Function ListAllFso(myPath$) '用FSO方法遍历并列出所有文件和文件夹名的【递归过程】
+
+    Set fld = CreateObject("Scripting.FileSystemObject").GetFolder(myPath)
+
+    '用FSO方法得到当前路径的文件夹对象实例 注意这里的【当前路径myPath是个递归变量】
+
+ 
+
+    For Each f In fld.Files  '遍历当前文件夹内所有【文件.Files】
+
+        [a65536].End(3).Offset(1) = f.Name  '在A列逐个列出文件名
+
+    Next
+
+ 
+
+    For Each fd In fld.SubFolders  '遍历当前文件夹内所有【子文件夹.SubFolders】
+
+        [a65536].End(3).Offset(1) = "" & fd.Path & "" '在A列逐个列出子文件夹名
+
+        [a65536].End(3).Interior.ColorIndex = 6
+
+        Call ListAllFso(fd.Path)       '注意此时的路径变量已经改变为【子文件夹的路径fd.Path】
+
+        '注意重点在这里： 继续向下调用递归过程【遍历子文件夹内所有文件文件夹对象】
+
+    Next
+
+End Function
+
+' https://jingyan.baidu.com/article/ca2d939d1a7bc2eb6c31ce84.html
+Sub 提取工作薄名称()
+
+  Dim s As Worksheet
+
+  Dim range As range
+
+  Dim i As Integer
+
+  Set range = ActiveSheet.range("A1")
+
+  For Each s In ThisWorkbook.Sheets
+
+    range.Offset(i, 0).Value = s.Name
+
+    i = i + 1
+
+    If i = ThisWorkbook.Sheets.Count - 1 Then Exit For
+
+  Next s
+
+End Sub
+
+' https://learn.microsoft.com/zh-cn/previous-versions/office/troubleshoot/office-developer/select-cells-rangs-with-visual-basic
+Sub select_all()
+    Application.Goto ActiveWorkbook.Sheets("Sheet2").Cells(6, 5)
+End Sub
